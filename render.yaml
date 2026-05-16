@@ -1,0 +1,62 @@
+# Render.com one-click deploy — https://render.com/deploy
+services:
+  - type: web
+    name: hackknow-ai-os
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /healthcheck
+    envVars:
+      - key: HACKKNOW_HOST
+        value: 0.0.0.0
+      - key: HACKKNOW_PORT
+        value: 8787
+      - key: HACKKNOW_ASSISTANT_MODE
+        value: jarvis
+      - key: HACKKNOW_ASSISTANT_NAME
+        value: Yahavi
+      - key: HACKKNOW_DEFAULT_LANG
+        value: auto
+      - key: OLLAMA_BASE_URL
+        value: ""           # Render free tier won't run Ollama; vault keys handle the load
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: TOGETHER_API_KEY
+        sync: false
+      - key: COHERE_API_KEY
+        sync: false
+      - key: MISTRAL_API_KEY
+        sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: EXA_API_KEY
+        sync: false
+      - key: SERPER_API_KEY
+        sync: false
+      - key: BRAVE_API_KEY
+        sync: false
+      - key: FIRECRAWL_API_KEY
+        sync: false
+      - key: JINA_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: WC_BASE_URL
+        value: https://shop.hackknow.com
+      - key: WC_CONSUMER_KEY
+        sync: false
+      - key: WC_CONSUMER_SECRET
+        sync: false

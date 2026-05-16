@@ -1,0 +1,35 @@
+# Fly.io deploy:  flyctl launch --copy-config --no-deploy && flyctl deploy
+app = "hackknow-ai-os"
+primary_region = "bom"        # Mumbai — closest free Fly region to India
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  HACKKNOW_HOST = "0.0.0.0"
+  HACKKNOW_PORT = "8787"
+  HACKKNOW_ASSISTANT_MODE = "jarvis"
+  HACKKNOW_ASSISTANT_NAME = "Yahavi"
+  HACKKNOW_DEFAULT_LANG = "auto"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"
+  cpus = 1
+
+[mounts]
+  source = "hackknow_cache"
+  destination = "/app/.cache"
