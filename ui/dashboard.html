@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>HackKnow AI OS — Agent Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #06070d; color: #e7eaf3; font-family: "Space Grotesk", sans-serif; padding: 32px; }
+  h1 { margin: 0 0 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 16px; }
+  .card { background: #0f1320; border: 1px solid #1c2236; border-radius: 12px; padding: 18px; }
+  .card .name { font-weight: 700; letter-spacing: 0.04em; }
+  .card .role { color: #8c93ab; font-size: 13px; margin-top: 6px; line-height: 1.5; }
+  .card .skills { margin-top: 10px; font-family: "JetBrains Mono", monospace; font-size: 11px; color: #21f0c5; }
+</style>
+</head>
+<body>
+<h1>HackKnow Agents</h1>
+<div class="grid" id="grid"></div>
+<script>
+fetch("/healthcheck").then(r => r.json()).then(j => {
+  const g = document.getElementById("grid");
+  (j.agents || []).forEach(a => {
+    const c = document.createElement("div");
+    c.className = "card";
+    c.innerHTML = `<div class="name">${a}</div><div class="role">Specialist agent</div>`;
+    g.appendChild(c);
+  });
+});
+</script>
+</body>
+</html>

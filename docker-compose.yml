@@ -1,0 +1,70 @@
+# =====================================================
+# HackKnow AI OS — full stack via docker compose
+# =====================================================
+version: "3.9"
+
+services:
+  api:
+    build: .
+    image: hackknow-ai-os:latest
+    container_name: hackknow-api
+    ports:
+      - "8787:8787"
+    env_file: .env
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      QDRANT_URL: http://qdrant:6333
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./voice_samples:/app/voice_samples:ro
+      - hackknow-cache:/app/.cache
+      - hackknow-workspaces:/app/workspaces
+    depends_on:
+      - ollama
+      - qdrant
+      - redis
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: hackknow-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: hackknow-qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: hackknow-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  flowise:
+    image: flowiseai/flowise:latest
+    container_name: hackknow-flowise
+    ports:
+      - "3000:3000"
+    environment:
+      FLOWISE_USERNAME: ${FLOWISE_USER:-admin}
+      FLOWISE_PASSWORD: ${FLOWISE_PASS:-hackknow}
+    volumes:
+      - flowise-data:/root/.flowise
+    restart: unless-stopped
+
+volumes:
+  hackknow-cache:
+  hackknow-workspaces:
+  ollama-models:
+  qdrant-data:
+  flowise-data:

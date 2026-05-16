@@ -1,0 +1,132 @@
+# =====================================================
+# Agent registry — declares the 15 specialist agents,
+# their tool allowlists, and their preferred LLM tier.
+# =====================================================
+
+agents:
+  ceo:
+    class: agents.ceo_agent.CEOAgent
+    role: "Top-level orchestrator. Greets the user, decides routing, synthesizes final response."
+    persona: jarvis
+    llm_tier: strong
+    skills: [all]
+
+  planner:
+    class: agents.planner_agent.PlannerAgent
+    role: "Decomposes complex requests into a directed acyclic graph of subtasks."
+    llm_tier: reasoning
+    skills: [research]
+
+  developer:
+    class: agents.developer_agent.DeveloperAgent
+    role: "Writes, reviews and runs code. Open-Interpreter style sandboxed execution."
+    llm_tier: strong
+    skills: [code_exec, browser, research]
+
+  marketing:
+    class: agents.marketing_agent.MarketingAgent
+    role: "Plans and runs marketing campaigns end-to-end."
+    llm_tier: strong
+    skills: [research, content, browser, workflow]
+
+  seo:
+    class: agents.seo_agent.SEOAgent
+    role: "Keyword research, on-page audits, SERP analysis, link prospecting."
+    llm_tier: strong
+    skills: [research, browser, data]
+
+  content_creator:
+    class: agents.content_creator_agent.ContentCreatorAgent
+    role: "Generates copy, images and structured content."
+    llm_tier: fast
+    skills: [content, research]
+
+  reel_creator:
+    class: agents.reel_creator_agent.ReelCreatorAgent
+    role: "Generates short-form vertical video reels."
+    llm_tier: strong
+    skills: [content, video, voice]
+
+  video_editor:
+    class: agents.video_editor_agent.VideoEditorAgent
+    role: "Edits, cuts, captions and renders video with Remotion + ffmpeg."
+    llm_tier: strong
+    skills: [video, content]
+
+  ecommerce:
+    class: agents.ecommerce_agent.EcommerceAgent
+    role: "Runs WooCommerce + Medusa ops: products, orders, pricing, inventory."
+    llm_tier: strong
+    skills: [ecommerce, data, browser]
+
+  data_analyst:
+    class: agents.data_analyst_agent.DataAnalystAgent
+    role: "Pandas-AI driven analysis, charts, insights."
+    llm_tier: strong
+    skills: [data, code_exec]
+
+  excel_dashboard:
+    class: agents.excel_dashboard_agent.ExcelDashboardAgent
+    role: "Generates Excel workbooks and Plotly dashboards."
+    llm_tier: fast
+    skills: [data]
+
+  automation:
+    class: agents.automation_agent.AutomationAgent
+    role: "Generic automation: schedules, webhooks, file ops, chained workflows."
+    llm_tier: fast
+    skills: [workflow, browser, code_exec]
+
+  voice_assistant:
+    class: agents.voice_assistant_agent.VoiceAssistantAgent
+    role: "Real-time voice conversation (Hindi + English)."
+    llm_tier: fast
+    skills: [voice]
+
+  research:
+    class: agents.research_agent.ResearchAgent
+    role: "Deep web research with citation. Reads docs + APIs automatically."
+    llm_tier: strong
+    skills: [research, browser]
+
+  social_media:
+    class: agents.social_media_agent.SocialMediaAgent
+    role: "Schedules and publishes to Instagram, X, LinkedIn, YouTube Shorts."
+    llm_tier: fast
+    skills: [browser, content, workflow]
+
+  skill_smith:
+    class: agents.skill_smith_agent.SkillSmithAgent
+    role: "Authors brand-new skill modules on demand. Researches APIs, writes manifest + run(), drops a draft under skills/_proposed for review."
+    llm_tier: reasoning
+    skills: [research, code_exec]
+
+  fine_tune:
+    class: agents.fine_tune_agent.FineTuneAgent
+    role: "Fine-tunes local + hosted models. Supports LoRA, QLoRA, OpenAI, HuggingFace, Axolotl, Unsloth, PEFT, Ollama custom Modelfiles."
+    llm_tier: strong
+    skills: [finetune, code_exec, data]
+
+  debug:
+    class: agents.debug_agent.DebugAgent
+    role: "Reads stack traces, isolates root causes, writes minimal patches, runs verification in the code_exec sandbox."
+    llm_tier: reasoning
+    skills: [code_exec, github, research]
+
+  browser:
+    class: agents.browser_agent.BrowserAgent
+    role: "Autonomous browser operator. Scrapes, fills forms, drives any site headlessly. Comet / browser-use style."
+    llm_tier: strong
+    skills: [browser, research]
+
+  deployment:
+    class: agents.deployment_agent.DeploymentAgent
+    role: "Writes Dockerfiles, docker-compose, GitHub Actions, Tauri / Capacitor configs. Knows Vercel, Railway, Fly.io, Render, K8s."
+    llm_tier: strong
+    skills: [code_exec, github, vibe_coding]
+
+  image:
+    class: agents.image_agent.ImageAgent
+    role: "Text-to-image + edits via ComfyUI / AnimateDiff. Style transfer, in-paint, batch generation."
+    llm_tier: fast
+    skills: [content]

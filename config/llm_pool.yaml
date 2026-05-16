@@ -1,0 +1,121 @@
+# =============================================================
+# Free-tier + paid LLM provider pool. Vault holds up to 50 keys
+# per provider. Router rotates with rate-limit + failover.
+# =============================================================
+
+providers:
+  - name: groq
+    enabled: true
+    env_key: GROQ_API_KEY
+    base_url: https://api.groq.com/openai/v1
+    default_model: llama-3.3-70b-versatile
+    models:
+      fast: llama-3.1-8b-instant
+      strong: llama-3.3-70b-versatile
+      reasoning: deepseek-r1-distill-llama-70b
+    rate_limit_rpm: 30
+    cost_tier: 0
+
+  - name: gemini
+    enabled: true
+    env_key: GEMINI_API_KEY
+    default_model: gemini-2.0-flash-exp
+    models:
+      fast: gemini-2.0-flash-exp
+      strong: gemini-2.0-pro-exp
+      long_context: gemini-1.5-pro
+    rate_limit_rpm: 15
+    cost_tier: 0
+
+  - name: openai
+    enabled: true
+    env_key: OPENAI_API_KEY
+    base_url: https://api.openai.com/v1
+    default_model: gpt-4o-mini
+    models:
+      fast: gpt-4o-mini
+      strong: gpt-4o
+      reasoning: o1-mini
+    rate_limit_rpm: 3500
+    cost_tier: 1
+
+  - name: anthropic
+    enabled: true
+    env_key: ANTHROPIC_API_KEY
+    default_model: claude-3-5-sonnet-latest
+    models:
+      fast: claude-3-5-haiku-latest
+      strong: claude-3-5-sonnet-latest
+    rate_limit_rpm: 50
+    cost_tier: 1
+
+  - name: cohere
+    enabled: true
+    env_key: COHERE_API_KEY
+    default_model: command-r-plus
+    models:
+      fast: command-r
+      strong: command-r-plus
+    rate_limit_rpm: 20
+    cost_tier: 0
+
+  - name: mistral
+    enabled: true
+    env_key: MISTRAL_API_KEY
+    base_url: https://api.mistral.ai/v1
+    default_model: open-mixtral-8x22b
+    models:
+      fast: open-mistral-7b
+      strong: open-mixtral-8x22b
+    rate_limit_rpm: 60
+    cost_tier: 0
+
+  - name: together
+    enabled: true
+    env_key: TOGETHER_API_KEY
+    base_url: https://api.together.xyz/v1
+    default_model: meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo
+    rate_limit_rpm: 60
+    cost_tier: 0
+
+  - name: openrouter
+    enabled: true
+    env_key: OPENROUTER_API_KEY
+    base_url: https://openrouter.ai/api/v1
+    default_model: meta-llama/llama-3.1-70b-instruct:free
+    rate_limit_rpm: 20
+    cost_tier: 0
+
+  - name: deepseek
+    enabled: true
+    env_key: DEEPSEEK_API_KEY
+    base_url: https://api.deepseek.com/v1
+    default_model: deepseek-chat
+    models:
+      fast: deepseek-chat
+      reasoning: deepseek-reasoner
+    rate_limit_rpm: 60
+    cost_tier: 0
+
+  - name: perplexity
+    enabled: true
+    env_key: PERPLEXITY_API_KEY
+    base_url: https://api.perplexity.ai
+    default_model: sonar
+    rate_limit_rpm: 60
+    cost_tier: 1
+
+  - name: huggingface
+    enabled: true
+    env_key: HUGGINGFACE_API_KEY
+    base_url: https://api-inference.huggingface.co
+    default_model: meta-llama/Meta-Llama-3-8B-Instruct
+    rate_limit_rpm: 30
+    cost_tier: 0
+
+  - name: ollama_local
+    enabled: true
+    env_key: null
+    rate_limit_rpm: 1000
+    cost_tier: 0
+    is_local: true

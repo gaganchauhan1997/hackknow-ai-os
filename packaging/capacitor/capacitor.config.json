@@ -1,0 +1,18 @@
+{
+  "appId": "com.hackknow.aios",
+  "appName": "HackKnow",
+  "webDir": "../../ui",
+  "server": {
+    "url": "http://10.0.2.2:8787",
+    "cleartext": true,
+    "allowNavigation": ["10.0.2.2", "localhost", "*.hackknow.com"]
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "SpeechRecognition": {
+      "language": "en-IN"
+    }
+  }
+}

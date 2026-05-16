@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# ============================================================
+# hackknow — unified CLI launcher
+#   ./hackknow               → install + start the server
+#   ./hackknow start         → just start the server
+#   ./hackknow install       → install only
+#   ./hackknow chat "<goal>" → one-shot autonomous run
+#   ./hackknow loop "<goal>" → Manus-style autonomous loop
+#   ./hackknow docker        → docker-compose up -d
+#   ./hackknow desktop       → build Tauri desktop app
+#   ./hackknow android       → build Android APK via Capacitor
+# ============================================================
+set -e
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$ROOT"
+
+cmd="${1:-bootstrap}"; shift || true
+
+case "$cmd" in
+  bootstrap|"" )
+    [ -d .venv ] || bash setup.sh
+    bash scripts/start_server.sh
+    ;;
+  install)
+    bash setup.sh
+    ;;
+  start)
+    bash scripts/start_server.sh
+    ;;
+  chat)
+    [ -d .venv ] && source .venv/bin/activate
+    python -c "
+import asyncio, sys
+from core.orchestrator import HackKnowOS
+async def main():
+    os_ = HackKnowOS(); await os_.boot()
+    r = await os_.execute(' '.join(sys.argv[1:]) or 'hello')
+    print(r.summary)
+    await os_.shutdown()
+asyncio.run(main())
+" "$@"
+    ;;
+  loop)
+    [ -d .venv ] && source .venv/bin/activate
+    python -c "
+import asyncio, sys, json
+from core.orchestrator import HackKnowOS
+async def main():
+    os_ = HackKnowOS(); await os_.boot()
+    async for ev in os_.loop.stream(' '.join(sys.argv[1:]) or 'check status'):
+        print(json.dumps(ev, ensure_ascii=False))
+    await os_.shutdown()
+asyncio.run(main())
+" "$@"
+    ;;
+  docker)
+    docker compose up -d
+    ;;
+  desktop)
+    cd packaging/tauri && cargo tauri build
+    ;;
+  android)
+    cd packaging/capacitor
+    npx cap add android || true
+    cd android && ./gradlew assembleDebug
+    ;;
+  *)
+    echo "Usage: ./hackknow [install|start|chat <goal>|loop <goal>|docker|desktop|android]"
+    exit 1
+    ;;
+esac
