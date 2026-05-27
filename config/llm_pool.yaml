@@ -8,21 +8,21 @@ providers:
     enabled: true
     env_key: GROQ_API_KEY
     base_url: https://api.groq.com/openai/v1
-    default_model: llama-3.3-70b-versatile
+    default_model: llama-3.1-70b-versatile
     models:
       fast: llama-3.1-8b-instant
-      strong: llama-3.3-70b-versatile
-      reasoning: deepseek-r1-distill-llama-70b
+      strong: llama-3.1-70b-versatile
+      reasoning: llama-3.1-70b-versatile
     rate_limit_rpm: 30
     cost_tier: 0
 
   - name: gemini
     enabled: true
     env_key: GEMINI_API_KEY
-    default_model: gemini-2.0-flash-exp
+    default_model: gemini-2.0-flash
     models:
-      fast: gemini-2.0-flash-exp
-      strong: gemini-2.0-pro-exp
+      fast: gemini-2.0-flash
+      strong: gemini-1.5-pro
       long_context: gemini-1.5-pro
     rate_limit_rpm: 15
     cost_tier: 0

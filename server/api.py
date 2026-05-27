@@ -182,17 +182,30 @@ async def healthcheck():
 async def execute(req: ExecuteRequest):
     if not os_:
         raise HTTPException(503, "boot in progress")
-    result = await os_.execute(req.goal, session=req.session, mode=req.mode)
-    return {
-        "summary": result.summary,
-        "language": result.language,
-        "job_id": result.job_id,
-        "tasks": [
-            {"id": t.id, "agent": t.agent, "status": t.status,
-             "result": t.result, "error": t.error}
-            for t in result.tasks
-        ],
-    }
+    try:
+        result = await os_.execute(req.goal, session=req.session, mode=req.mode)
+        return {
+            "summary": result.summary,
+            "language": result.language,
+            "job_id": result.job_id,
+            "tasks": [
+                {"id": t.id, "agent": t.agent, "status": t.status,
+                 "result": t.result, "error": t.error}
+                for t in result.tasks
+            ],
+        }
+    except Exception as exc:
+        log.error(f"/execute failed: {exc!r}")
+        return JSONResponse(
+            status_code=200,
+            content={
+                "summary": f"⚠ All providers failed. Check API keys in the vault. ({exc})",
+                "language": "en",
+                "job_id": None,
+                "tasks": [],
+                "error": str(exc),
+            },
+        )
 
 
 @app.post("/delegate")

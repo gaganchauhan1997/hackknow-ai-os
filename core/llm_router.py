@@ -247,8 +247,10 @@ class LLMRouter:
 
     # ------------- Ollama (always available local fallback — zero-key mode)
     async def _ollama_call(self, messages, temperature, max_tokens):
-        base = settings.ollama_base_url
+        base = (settings.ollama_base_url or "").strip()
         model = settings.ollama_model
+        if not base or not base.startswith(("http://", "https://")):
+            raise LLMError("Ollama disabled (OLLAMA_BASE_URL not set)")
         payload = {"model": model, "messages": messages, "stream": False,
                    "options": {"temperature": temperature, "num_predict": max_tokens}}
         try:
