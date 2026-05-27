@@ -62,10 +62,10 @@ class SkillRegistry:
     def get(self, name: str) -> Skill | None:
         return self._skills.get(name)
 
-    async def run(self, name: str, **kwargs):
-        skill = self.get(name)
+    async def run(self, _skill_name: str, **kwargs):
+        skill = self.get(_skill_name)
         if not skill:
-            raise KeyError(f"unknown skill: {name}")
+            raise KeyError(f"unknown skill: {_skill_name}")
         return await skill.runner(**kwargs)
 
     def tool_spec(self) -> list[dict]:
