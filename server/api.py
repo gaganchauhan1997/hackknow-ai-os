@@ -84,6 +84,24 @@ app = FastAPI(title="HackKnow AI OS", lifespan=lifespan, version="0.2.0")
 app.add_middleware(CORSMiddleware,
     allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
 
+
+# ---------- canonical-host redirect: keep ONE public URL --------------------
+import os as _os
+CANONICAL_HOST = _os.getenv("HACKKNOW_CANONICAL_HOST", "yahavis.hackknow.com")
+
+@app.middleware("http")
+async def _canonical_redirect(request, call_next):
+    """301 anything not on the canonical host (e.g. *.onrender.com) → yahavis."""
+    host = (request.headers.get("host") or "").split(":")[0].lower()
+    if host and host != CANONICAL_HOST and host.endswith("onrender.com"):
+        from starlette.responses import RedirectResponse
+        url = f"https://{CANONICAL_HOST}{request.url.path}"
+        if request.url.query:
+            url += "?" + request.url.query
+        return RedirectResponse(url, status_code=301)
+    return await call_next(request)
+
+
 UI_DIR = ROOT / "ui"
 app.mount("/static", StaticFiles(directory=str(UI_DIR)), name="static")
 
