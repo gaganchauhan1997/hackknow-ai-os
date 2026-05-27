@@ -399,7 +399,12 @@ async def attach_repo(req: RepoRequest):
 async def finetune(payload: dict):
     if not os_:
         raise HTTPException(503)
-    return await os_.skills.run("finetune", **payload)
+    try:
+        return await os_.skills.run("finetune", **payload)
+    except Exception as exc:
+        log.error(f"/finetune failed: {exc!r}")
+        return {"status": "error", "reason": str(exc),
+                "hint": "Fine-tune needs PEFT + torch — install requirements-extras.txt on a GPU host."}
 
 
 # =========================================================== workflows ====
@@ -412,7 +417,11 @@ async def workflows():
 async def workflow_run(payload: dict):
     if not os_:
         raise HTTPException(503)
-    return await os_.skills.run("workflow", **payload)
+    try:
+        return await os_.skills.run("workflow", **payload)
+    except Exception as exc:
+        log.error(f"/workflows/run failed: {exc!r}")
+        return {"status": "error", "reason": str(exc)}
 
 
 # =========================================================== browser ====
@@ -420,7 +429,62 @@ async def workflow_run(payload: dict):
 async def browser_run(payload: dict):
     if not os_:
         raise HTTPException(503)
-    return await os_.skills.run("browser", **payload)
+    try:
+        return await os_.skills.run("browser", **payload)
+    except Exception as exc:
+        log.error(f"/browser/run failed: {exc!r}")
+        return {"status": "error", "reason": str(exc),
+                "hint": "Lean deploy supports scrape via httpx; full automation needs requirements-extras.txt."}
+
+
+# =========================================================== rag ====
+@app.post("/rag/ingest")
+async def rag_ingest(payload: dict):
+    if not os_:
+        raise HTTPException(503)
+    try:
+        return await os_.skills.run(
+            "rag", mode="ingest",
+            paths=payload.get("paths", []),
+            namespace=payload.get("namespace", "default"),
+        )
+    except Exception as exc:
+        log.error(f"/rag/ingest failed: {exc!r}")
+        return {"status": "error", "reason": str(exc)}
+
+
+@app.post("/rag/query")
+async def rag_query(payload: dict):
+    if not os_:
+        raise HTTPException(503)
+    try:
+        return await os_.skills.run(
+            "rag", mode="query",
+            query=payload.get("query", ""),
+            namespace=payload.get("namespace", "default"),
+            k=int(payload.get("k", 5)),
+        )
+    except Exception as exc:
+        log.error(f"/rag/query failed: {exc!r}")
+        return {"status": "error", "reason": str(exc)}
+
+
+# =========================================================== tts (text-to-speech) ====
+@app.post("/tts")
+async def tts(payload: dict):
+    """Server-side TTS. Falls back gracefully when XTTS-v2 not installed.
+       Frontend can ALSO use the browser's speechSynthesis API for instant playback."""
+    if not os_:
+        raise HTTPException(503)
+    try:
+        out = await os_.skills.run("voice_clone",
+            text=payload.get("text", ""),
+            voice=payload.get("voice", "male"),
+            lang=payload.get("lang", "auto"))
+        return out
+    except Exception as exc:
+        return {"status": "skipped", "reason": str(exc),
+                "hint": "Server-side cloning needs coqui-tts (requirements-extras.txt). Use browser speechSynthesis."}
 
 
 # =========================================================== automations ====

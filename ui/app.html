@@ -220,6 +220,16 @@ main{display:flex;flex-direction:column;overflow:hidden;background:var(--paper)}
 pre.console{background:var(--ink);color:var(--green);border:3px solid var(--ink);padding:14px 16px;font-family:"JetBrains Mono",monospace;
   font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:380px;overflow-y:auto;box-shadow:var(--shadow-xs)}
 
+/* ============ TOAST ============ */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--snow);border:3px solid var(--ink);box-shadow:var(--shadow-sm);
+  padding:10px 18px;font-weight:700;font-size:14px;z-index:100;opacity:0;
+  transition:opacity .2s,transform .25s;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green)}
+.toast.danger{background:var(--coral);color:var(--snow)}
+.toast.info{background:var(--primary)}
+
 /* ============ MOBILE ============ */
 @media (max-width:760px){
   .layout{grid-template-columns:0 1fr}
@@ -752,10 +762,14 @@ async function refreshKeys(){
   });
 }
 async function addKey(){
-  const secret=$("k-secret").value.trim();if(!secret)return;
-  await fetch("/keys",{method:"POST",headers:{"content-type":"application/json"},
+  const secret=$("k-secret").value.trim();if(!secret){toast("Paste an API key first","danger");return;}
+  const r=await fetch("/keys",{method:"POST",headers:{"content-type":"application/json"},
     body:JSON.stringify({provider:$("k-provider").value,secret,label:$("k-label").value,tier:$("k-tier").value})});
-  $("k-secret").value="";$("k-label").value="";refreshKeys();refresh();
+  const j=await r.json();
+  if(j.id){toast("✓ Key added: "+j.provider+" "+j.masked,"ok");
+    $("k-secret").value="";$("k-label").value="";}
+  else toast("✗ "+(j.detail||"add failed"),"danger");
+  refreshKeys();refresh();
 }
 async function rmKey(id){await fetch("/keys/"+id,{method:"DELETE"});refreshKeys();refresh();}
 
@@ -772,10 +786,15 @@ async function refreshAgents(){
   });
 }
 async function createAgent(){
-  const id=$("ag-id").value.trim();const role=$("ag-role").value.trim();if(!id||!role)return;
-  await fetch("/agents",{method:"POST",headers:{"content-type":"application/json"},
+  const id=$("ag-id").value.trim();const role=$("ag-role").value.trim();
+  if(!id||!role){toast("Need agent id + role","danger");return;}
+  const r=await fetch("/agents",{method:"POST",headers:{"content-type":"application/json"},
     body:JSON.stringify({id,role,llm_tier:$("ag-tier").value||"strong",
       skills:$("ag-skills").value.split(",").map(s=>s.trim()).filter(Boolean)})});
+  const j=await r.json();
+  if(j.created){toast("✓ Agent "+j.created+" created","ok");
+    $("ag-id").value="";$("ag-role").value="";$("ag-skills").value="";}
+  else toast("✗ "+(j.detail||"create failed"),"danger");
   refreshAgents();
 }
 
@@ -811,15 +830,56 @@ async function ftLora(kind){
   o.textContent=JSON.stringify(await r.json(),null,2);
 }
 
-// --- voice studio ---
+// --- voice studio — instant TTS using browser speechSynthesis ---
+function pickVoice(lang, gender){
+  const voices=window.speechSynthesis.getVoices();
+  if(!voices.length)return null;
+  // prefer Indian / female / male match
+  const langTag = lang==="hi"?"hi":"en";
+  const filtered = voices.filter(v=>v.lang.toLowerCase().startsWith(langTag));
+  if(!filtered.length)return voices[0];
+  const wantFemale = gender==="female";
+  return filtered.find(v=>/female|priya|aditi|neel|samantha|google\s.*female/i.test(v.name))
+      || filtered.find(v=>!wantFemale && /male|ravi|hemant|rishi|google\s.*male/i.test(v.name))
+      || filtered[0];
+}
+function detectLang(text){
+  return /[ऀ-ॿ]/.test(text)?"hi":"en";
+}
 async function speak(voice){
-  $("tts-text").value=voice==="male"?"Good evening Boss, systems are online.":"नमस्ते बॉस, सब सिस्टम्स ऑनलाइन हैं।";
-  $("tts-voice").value=voice;ttsCustom();
+  $("tts-text").value=voice==="male"
+    ?"Good evening Boss, systems are online."
+    :"नमस्ते बॉस, सब सिस्टम्स ऑनलाइन हैं।";
+  $("tts-voice").value=voice;
+  ttsCustom();
 }
 async function ttsCustom(){
-  const text=$("tts-text").value.trim();if(!text)return;
-  await fetch("/agents/voice_assistant/run",{method:"POST",headers:{"content-type":"application/json"},
-    body:JSON.stringify({task:text})}).catch(()=>{});
+  const text=$("tts-text").value.trim();if(!text){toast("Type something to speak","danger");return;}
+  const voice=$("tts-voice").value;
+  const lang=detectLang(text);
+
+  // 1) instant browser TTS
+  if("speechSynthesis"in window){
+    try{window.speechSynthesis.cancel();}catch(e){}
+    const utter=new SpeechSynthesisUtterance(text);
+    utter.lang=lang==="hi"?"hi-IN":"en-IN";
+    utter.rate=1.0;utter.pitch=voice==="female"?1.15:0.95;utter.volume=1.0;
+    // ensure voices loaded
+    const setupVoice=()=>{const v=pickVoice(lang,voice);if(v)utter.voice=v;};
+    if(window.speechSynthesis.getVoices().length===0){
+      window.speechSynthesis.addEventListener("voiceschanged",setupVoice,{once:true});
+      setTimeout(setupVoice,100);
+    }else setupVoice();
+    utter.onstart=()=>toast("🔊 "+(voice==="female"?"Priyanka":"Laksh")+" speaking ("+lang+")…","info",1500);
+    utter.onerror=e=>toast("Voice error: "+e.error,"danger");
+    window.speechSynthesis.speak(utter);
+  }
+  // 2) trigger server-side cloned XTTS in background (works if extras installed)
+  fetch("/tts",{method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({text,voice,lang})}).then(r=>r.json()).then(j=>{
+      if(j.path)toast("✓ Server clone saved: "+j.path.split("/").pop(),"ok",2500);
+      else if(j.status==="skipped")console.log("server tts skipped:",j.reason);
+  }).catch(()=>{});
 }
 
 // --- workflows ---
@@ -857,28 +917,55 @@ async function refreshAutos(){
   });
 }
 async function addAuto(){
-  await fetch("/automations",{method:"POST",headers:{"content-type":"application/json"},
-    body:JSON.stringify({name:$("au-name").value,schedule:$("au-schedule").value,agent:$("au-agent").value,task:$("au-task").value})});
+  const name=$("au-name").value.trim(),sch=$("au-schedule").value.trim(),
+        ag=$("au-agent").value.trim(),tk=$("au-task").value.trim();
+  if(!name||!sch||!ag||!tk){toast("Fill all 4 fields","danger");return;}
+  const r=await fetch("/automations",{method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({name,schedule:sch,agent:ag,task:tk})});
+  const j=await r.json();
+  if(j.id){toast("✓ Automation registered","ok");
+    $("au-name").value="";$("au-schedule").value="";$("au-agent").value="";$("au-task").value="";}
   refreshAutos();
 }
 async function rmAuto(id){await fetch("/automations/"+id,{method:"DELETE"});refreshAutos();}
 
-// --- RAG ---
+// --- RAG (direct skill endpoints) ---
 async function ragIngest(){
-  const o=$("mem-out");o.style.display="block";
-  const r=await fetch("/agents/research/run",{method:"POST",headers:{"content-type":"application/json"},
-    body:JSON.stringify({task:`Ingest ${$("mem-path").value} into RAG namespace ${$("mem-ns").value}`})});
-  o.textContent=JSON.stringify(await r.json(),null,2);
+  const o=$("mem-out");o.style.display="block";o.textContent="ingesting…";
+  const path=$("mem-path").value.trim();
+  if(!path){o.textContent="";toast("Path required","danger");return;}
+  const r=await fetch("/rag/ingest",{method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({paths:[path],namespace:$("mem-ns").value||"default"})});
+  const j=await r.json();
+  o.textContent=JSON.stringify(j,null,2);
+  if(j.ingested_chunks)toast("✓ Ingested "+j.ingested_chunks+" chunks","ok");
+  else if(j.status==="error")toast("✗ "+j.reason,"danger");
 }
 async function ragQuery(){
-  const o=$("mem-out");o.style.display="block";
-  const r=await fetch("/agents/research/run",{method:"POST",headers:{"content-type":"application/json"},
-    body:JSON.stringify({task:$("mem-q").value})});
-  o.textContent=JSON.stringify(await r.json(),null,2);
+  const o=$("mem-out");o.style.display="block";o.textContent="searching…";
+  const q=$("mem-q").value.trim();
+  if(!q){o.textContent="";toast("Type a question","danger");return;}
+  const r=await fetch("/rag/query",{method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({query:q,namespace:$("mem-ns").value||"default",k:5})});
+  const j=await r.json();
+  o.textContent=JSON.stringify(j,null,2);
+  if(j.hits)toast("✓ "+j.hits.length+" hits","ok");
+}
+
+// --- toast notifications ---
+function toast(text,kind,ms){
+  const t=document.createElement("div");
+  t.className="toast "+(kind||"info");t.textContent=text;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add("show"));
+  setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300);},ms||3000);
 }
 
 // --- PWA ---
 if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});
+
+// pre-warm speech voices (some browsers populate lazily)
+if("speechSynthesis"in window){window.speechSynthesis.getVoices();}
 </script>
 </body>
 </html>
