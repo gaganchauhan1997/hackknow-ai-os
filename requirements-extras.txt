@@ -1,0 +1,34 @@
+# ===========================================================
+# Optional heavy extras. Install locally for full power.
+#
+#   pip install -r requirements-extras.txt
+#
+# Skipped by default on Render free tier (RAM + disk limits).
+# ===========================================================
+
+# --- agent orchestration libraries (heavy, conflict-prone) ---
+langchain>=0.2
+langchain-community>=0.2
+crewai>=0.30
+pyautogen>=0.2.30
+
+# --- voice STT + cloning ---
+faster-whisper>=1.0
+sounddevice>=0.4
+soundfile>=0.12
+coqui-tts>=0.24
+
+# --- browser automation ---
+playwright>=1.43
+browser-use>=0.1.10
+
+# --- vector embeddings ---
+sentence-transformers>=2.7
+
+# --- video ---
+moviepy>=1.0.3
+imageio>=2.34
+ffmpeg-python>=0.2
+
+# --- data NL ---
+pandasai>=2.0

@@ -1,3 +1,11 @@
+# ===========================================================
+# HackKnow AI OS — lean dependency set (Render free tier safe)
+#
+# Optional heavy extras (voice cloning, fine-tuning, browser
+# automation, video) live in requirements-extras.txt — install
+# locally with:   pip install -r requirements-extras.txt
+# ===========================================================
+
 # --- core async + server ---
 fastapi>=0.110
 uvicorn[standard]>=0.27
@@ -12,57 +20,31 @@ aiofiles>=23.2
 orjson>=3.9
 websockets>=12.0
 
-# --- LLM clients (all free-tier capable) ---
+# --- LLM clients (lightweight HTTP) ---
 groq>=0.5
 google-generativeai>=0.5
 cohere>=5.3
 mistralai>=0.2
 together>=1.1
-openai>=1.30          # used for OpenRouter + Ollama OpenAI-compatible endpoints
+openai>=1.30
 huggingface_hub>=0.23
 
-# --- agent orchestration ---
-langchain>=0.2
-langchain-community>=0.2
-crewai>=0.30
-pyautogen>=0.2.30
-autogen-agentchat>=0.2
-
-# --- memory / vector store ---
+# --- memory / RAG (Chroma uses bundled embeddings) ---
 chromadb>=0.5
-sentence-transformers>=2.7
 
-# --- browser + research ---
-playwright>=1.43
-browser-use>=0.1.10
+# --- research + ecommerce + browser scrape ---
 beautifulsoup4>=4.12
 duckduckgo-search>=5.3
+requests>=2.31
+woocommerce>=3.0
 
-# --- voice ---
-faster-whisper>=1.0
-sounddevice>=0.4
-soundfile>=0.12
-numpy>=1.26
-# kokoro is installed by scripts/pull_local_models.sh (PyPI: kokoro)
-
-# --- voice cloning (XTTS-v2 / F5-TTS optional fallback) ---
-# coqui-tts brings XTTS-v2; first call auto-downloads weights (~1.8GB)
-coqui-tts>=0.24
-pypdf>=4.0
-python-docx>=1.1
-
-# --- content + media ---
-pillow>=10.3
-moviepy>=1.0.3
-imageio>=2.34
-ffmpeg-python>=0.2
-
-# --- data / dashboard ---
+# --- data + excel ---
 pandas>=2.2
 openpyxl>=3.1
 plotly>=5.21
-pandasai>=2.0
+numpy>=1.26
+pillow>=10.3
 
-# --- ecommerce ---
-woocommerce>=3.0
-requests>=2.31
+# --- docs ingestion for RAG ---
+pypdf>=4.0
+python-docx>=1.1
