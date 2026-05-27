@@ -1,0 +1,74 @@
+HACKKNOW PLATFORM KNOWLEDGE BASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BRAND IDENTITY
+Name: Hackknow
+Tagline: "Know the hack."
+Mission: Democratize cybersecurity and tech education in India
+Operator: Myth (ceo.hackknow@gmail.com)
+Location: Delhi, India
+
+PLATFORM URLS
+Main site:   https://hackknow.com
+Shop:        https://shop.hackknow.com (WooCommerce)
+Admin:       https://shop.hackknow.com/wp-admin
+
+PRODUCT CATEGORIES
+- Security Tools (Kali scripts, Nmap, Metasploit resources)
+- Ethical Hacking Courses
+- Programming Tutorials (Python, JavaScript, React)
+- CTF Resources
+- Bug Bounty Guides
+- Digital Downloads (PDFs, code packs, templates)
+- Web Development Templates
+
+PRICING STRATEGY
+- Currency: INR (Indian Rupee)
+- Entry tools: ₹99 - ₹299
+- Mid-tier courses: ₹499 - ₹999
+- Premium bundles: ₹1499 - ₹2999
+- Free tier: Sample tools, basic tutorials
+
+TARGET AUDIENCE
+- Indian students (BCA, B.Tech, MCA)
+- Self-taught developers
+- Aspiring ethical hackers
+- Freelancers and startup builders
+- Age: 18-30, tier 2/3 cities
+
+CONTENT VOICE
+- Direct and no-nonsense
+- Mix of Hindi and English (Hinglish OK)
+- Ambitious and aspirational
+- Community-first ("Hackknow family")
+- Anti-corporate, pro-builder
+
+WOOCOMMERCE API
+Base URL: https://shop.hackknow.com/wp-json/wc/v3
+Auth: Consumer Key + Consumer Secret (Basic Auth)
+Key endpoints:
+  GET /orders     - List orders
+  GET /products   - List products
+  POST /products  - Create product
+  PUT /products/{id} - Update product
+  GET /reports/sales - Sales report
+
+COMMON YAHAVIS TASKS FOR HACKKNOW
+1. Check new orders → GET /orders?after=today
+2. Add product → POST /products (auto-generate description)
+3. Write SEO content → ContentEngine → update Yoast fields
+4. Check site status → HTTP GET shop.hackknow.com
+5. Generate promo posts → Instagram + Twitter + WhatsApp
+6. Revenue report → GET /reports/sales
+
+SOCIAL HANDLES (for content generation)
+Instagram: @hackknow.official
+Twitter: @hackknow_in
+YouTube: Hackknow
+Telegram: t.me/hackknow
+
+COMPETITORS TO REFERENCE IN CONTENT
+- CodeWithHarry (educational content)
+- ThePCsecurity (security tools)
+- PW Skills / Apna College (courses)
+Differentiator: Real tools + Practical hacking focus
