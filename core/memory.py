@@ -39,7 +39,8 @@ class TurnBuffer:
         buf.append({"role": role, "content": content, "ts": time.time()})
 
     def messages(self, scope: str) -> list[dict]:
-        return list(self._store.get(scope, []))
+        """Return clean role/content dicts (drop internal ts field for API safety)."""
+        return [{"role": m["role"], "content": m["content"]} for m in self._store.get(scope, [])]
 
     def clear(self, scope: str) -> None:
         self._store.pop(scope, None)

@@ -19,11 +19,11 @@ providers:
   - name: gemini
     enabled: true
     env_key: GEMINI_API_KEY
-    default_model: gemini-2.0-flash
+    default_model: gemini-2.5-flash
     models:
-      fast: gemini-2.0-flash
-      strong: gemini-1.5-pro
-      long_context: gemini-1.5-pro
+      fast: gemini-2.5-flash
+      strong: gemini-2.5-pro
+      long_context: gemini-2.5-pro
     rate_limit_rpm: 15
     cost_tier: 0
 
