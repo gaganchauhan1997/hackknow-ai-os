@@ -376,7 +376,7 @@ pre.console{background:var(--ink);color:var(--green);border:3px solid var(--ink)
         </div>
         <textarea class="textarea" id="ag-role" placeholder="Role / system prompt..." style="margin-top:10px"></textarea>
         <input class="input" id="ag-skills" placeholder="skills, comma-separated" style="margin-top:10px"/>
-        <button class="btn primary" style="margin-top:12px" onclick="createAgent()">Create Agent</button>
+        <button class="btn primary" style="margin-top:12px" data-action="createAgent()">
       </div>
     </section>
 
@@ -388,7 +388,7 @@ pre.console{background:var(--ink);color:var(--green);border:3px solid var(--ink)
       <div class="section-title">Ask Skill Smith</div>
       <div class="card">
         <input class="input" id="sk-target" placeholder="e.g. 'Notion API', 'Razorpay payments'"/>
-        <button class="btn blue" style="margin-top:12px;color:#fff" onclick="authorSkill()">Author New Skill</button>
+        <button class="btn blue" style="margin-top:12px;color:#fff" data-action="authorSkill()">
         <pre class="console" id="sk-out" style="margin-top:14px;display:none"></pre>
       </div>
     </section>
@@ -404,7 +404,7 @@ pre.console{background:var(--ink);color:var(--green);border:3px solid var(--ink)
           <input class="input" id="ft-name" placeholder="model name (yahavi-jarvis)" style="margin-top:10px"/>
           <input class="input" id="ft-base" placeholder="base (llama3.1:8b)" style="margin-top:10px"/>
           <textarea class="textarea" id="ft-prompt" placeholder="system prompt..." style="margin-top:10px"></textarea>
-          <button class="btn primary" style="margin-top:10px" onclick="ftOllama()">Build Modelfile</button>
+          <button class="btn primary" style="margin-top:10px" data-action="ftOllama()">
         </div>
         <div class="card">
           <h3>LoRA / QLoRA</h3>
@@ -413,8 +413,8 @@ pre.console{background:var(--ink);color:var(--green);border:3px solid var(--ink)
           <input class="input" id="ft-lora-base" placeholder="base model" style="margin-top:10px"/>
           <input class="input" id="ft-lora-data" placeholder="path/to/dataset.jsonl" style="margin-top:10px"/>
           <div style="display:flex;gap:10px;margin-top:10px">
-            <button class="btn" onclick="ftLora('lora')">LoRA</button>
-            <button class="btn primary" onclick="ftLora('qlora')">QLoRA (4-bit)</button>
+            <button class="btn" data-action="ftLora('lora')">
+            <button class="btn primary" data-action="ftLora('qlora')">
           </div>
         </div>
       </div>
@@ -431,8 +431,8 @@ pre.console{background:var(--ink);color:var(--green);border:3px solid var(--ink)
           <h3>Cloned Voices</h3>
           <p>Reference samples bundled — Laksh (male) + Priyanka (female).</p>
           <div style="margin-top:12px;display:flex;gap:10px">
-            <button class="btn" onclick="speak('male')">Test Male</button>
-            <button class="btn pink" onclick="speak('female')">Test Female</button>
+            <button class="btn" data-action="speak('male')">
+            <button class="btn pink" data-action="speak('female')">
           </div>
         </div>
         <div class="card">
@@ -442,7 +442,7 @@ pre.console{background:var(--ink);color:var(--green);border:3px solid var(--ink)
             <select class="select" id="tts-voice" style="flex:0 0 140px">
               <option value="male">Male</option><option value="female">Female</option>
             </select>
-            <button class="btn primary" onclick="ttsCustom()">Speak</button>
+            <button class="btn primary" data-action="ttsCustom()">
           </div>
         </div>
       </div>
@@ -480,14 +480,14 @@ pre.console{background:var(--ink);color:var(--green);border:3px solid var(--ink)
           <textarea class="textarea" id="wf-steps" placeholder="Research the current Hackknow mug niche
 Write 3 catchy tagline options
 Recommend the strongest and explain why" style="margin-top:10px;min-height:140px"></textarea>
-          <button class="btn primary" style="margin-top:10px" onclick="runInlineChain()">Run Chain</button>
+          <button class="btn primary" style="margin-top:10px" data-action="runInlineChain()">
         </div>
         <div class="card">
           <h3>Flowise Bridge</h3>
           <p>For visual flows built in your Flowise instance.</p>
           <input class="input" id="wf-id" placeholder="flow id" style="margin-top:10px"/>
           <textarea class="textarea" id="wf-payload" placeholder='{"question": "..."}' style="margin-top:10px"></textarea>
-          <button class="btn blue" style="margin-top:10px;color:#fff" onclick="runWorkflow()">Run Flowise</button>
+          <button class="btn blue" style="margin-top:10px;color:#fff" data-action="runWorkflow()">
         </div>
       </div>
       <pre class="console" id="wf-out" style="margin-top:14px;display:none"></pre>
@@ -501,12 +501,12 @@ Recommend the strongest and explain why" style="margin-top:10px;min-height:140px
         <div class="card">
           <h3>Quick Scrape</h3>
           <input class="input" id="br-url" placeholder="https://..." style="margin-top:10px"/>
-          <button class="btn primary" style="margin-top:10px" onclick="brScrape()">Scrape</button>
+          <button class="btn primary" style="margin-top:10px" data-action="brScrape()">
         </div>
         <div class="card">
           <h3>Agentic Action</h3>
           <textarea class="textarea" id="br-task" placeholder="e.g. 'Go to instagram, create a post...'" style="margin-top:10px"></textarea>
-          <button class="btn blue" style="margin-top:10px;color:#fff" onclick="brAgent()">Run</button>
+          <button class="btn blue" style="margin-top:10px;color:#fff" data-action="brAgent()">
         </div>
       </div>
       <pre class="console" id="br-out" style="margin-top:14px;display:none"></pre>
@@ -525,7 +525,7 @@ Recommend the strongest and explain why" style="margin-top:10px;min-height:140px
           <input class="input" id="au-agent" placeholder="agent"/>
           <input class="input" id="au-task" placeholder="task"/>
         </div>
-        <button class="btn primary" style="margin-top:12px" onclick="addAuto()">Schedule</button>
+        <button class="btn primary" style="margin-top:12px" data-action="addAuto()">
       </div>
       <div id="autos" style="margin-top:18px" class="grid-2"></div>
     </section>
@@ -539,12 +539,12 @@ Recommend the strongest and explain why" style="margin-top:10px;min-height:140px
           <h3>Ingest</h3>
           <input class="input" id="mem-path" placeholder="absolute path to doc" style="margin-top:10px"/>
           <input class="input" id="mem-ns" placeholder="namespace" value="default" style="margin-top:10px"/>
-          <button class="btn primary" style="margin-top:10px" onclick="ragIngest()">Ingest</button>
+          <button class="btn primary" style="margin-top:10px" data-action="ragIngest()">
         </div>
         <div class="card">
           <h3>Search</h3>
           <input class="input" id="mem-q" placeholder="ask a question..." style="margin-top:10px"/>
-          <button class="btn blue" style="margin-top:10px;color:#fff" onclick="ragQuery()">Search</button>
+          <button class="btn blue" style="margin-top:10px;color:#fff" data-action="ragQuery()">
         </div>
       </div>
       <pre class="console" id="mem-out" style="margin-top:14px;display:none"></pre>
@@ -596,7 +596,7 @@ Recommend the strongest and explain why" style="margin-top:10px;min-height:140px
           <select class="select" id="k-tier" style="flex:0 0 140px">
             <option value="free">Free</option><option value="paid">Paid</option>
           </select>
-          <button class="btn primary" onclick="addKey()">+ Add Key</button>
+          <button class="btn primary" data-action="addKey()">
         </div>
       </div>
       <div class="keys-table">
@@ -664,6 +664,19 @@ Recommend the strongest and explain why" style="margin-top:10px;min-height:140px
   </div>
 </main>
 </div>
+
+
+// ── wire all buttons via addEventListener (CF-proof, eval in global scope) ──
+function _dispatch(action) {
+  try { eval(action); } catch(ex) { console.error("dispatch error:", action, ex); }
+}
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll("[data-action]").forEach(function(el) {
+    el.addEventListener("click", function(e) { e.preventDefault(); _dispatch(el.dataset.action); });
+    // also wire touchend for mobile responsiveness
+    el.addEventListener("touchend", function(e) { e.preventDefault(); _dispatch(el.dataset.action); });
+  });
+});
 
 <script>
 const $=(id)=>document.getElementById(id);
@@ -768,7 +781,7 @@ async function refreshKeys(){
     tr.innerHTML=`<td>${k.provider}</td><td>${k.label||""}</td><td>${k.secret}</td>
       <td><span class="key-status ${k.status}">${k.status}</span></td>
       <td>${fmt(k.tokens_today)}</td><td>${k.requests_today||0}</td>
-      <td><button class="x-btn" onclick="rmKey('${k.id}')">✕</button></td>`;
+      <td><button class="x-btn">✕</button></td>`;
     body.appendChild(tr);
   });
 }
@@ -985,7 +998,7 @@ async function refreshAutos(){
     const el=document.createElement("div");el.className="card";
     el.innerHTML=`<h3>${a.name}</h3><p>${a.task}</p>
       <div style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700"><span style="background:var(--green);padding:2px 8px">${a.schedule}</span> → <span style="background:var(--blue);color:#fff;padding:2px 8px">${a.agent}</span></div>
-      <button class="btn danger" style="margin-top:10px" onclick="rmAuto('${a.id}')">Delete</button>`;
+      <button class="btn danger" style="margin-top:10px">Delete</button>`;
     c.appendChild(el);
   });
 }
