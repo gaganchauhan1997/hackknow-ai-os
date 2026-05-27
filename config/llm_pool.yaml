@@ -8,11 +8,11 @@ providers:
     enabled: true
     env_key: GROQ_API_KEY
     base_url: https://api.groq.com/openai/v1
-    default_model: llama-3.1-70b-versatile
+    default_model: llama-3.3-70b-versatile
     models:
       fast: llama-3.1-8b-instant
-      strong: llama-3.1-70b-versatile
-      reasoning: llama-3.1-70b-versatile
+      strong: llama-3.3-70b-versatile
+      reasoning: meta-llama/llama-4-scout-17b-16e-instruct
     rate_limit_rpm: 30
     cost_tier: 0
 
