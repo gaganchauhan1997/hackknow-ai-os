@@ -472,14 +472,25 @@ pre.console{background:var(--ink);color:var(--green);border:3px solid var(--ink)
     <!-- ===== WORKFLOWS ===== -->
     <section id="view-workflows" class="view-pane">
       <h2>Workflows</h2>
-      <p class="sub">Native DAG runner + Flowise bridge.</p>
-      <div class="card">
-        <h3>Flowise Bridge</h3>
-        <input class="input" id="wf-id" placeholder="flow id" style="margin-top:10px"/>
-        <textarea class="textarea" id="wf-payload" placeholder='{"question": "..."}' style="margin-top:10px"></textarea>
-        <button class="btn primary" style="margin-top:10px" onclick="runWorkflow()">Run</button>
-        <pre class="console" id="wf-out" style="margin-top:14px;display:none"></pre>
+      <p class="sub">Native inline chain runner (always works) + Flowise bridge (when reachable).</p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Inline Chain</h3>
+          <p>One step per line — each step receives the previous step's output.</p>
+          <textarea class="textarea" id="wf-steps" placeholder="Research the current Hackknow mug niche
+Write 3 catchy tagline options
+Recommend the strongest and explain why" style="margin-top:10px;min-height:140px"></textarea>
+          <button class="btn primary" style="margin-top:10px" onclick="runInlineChain()">Run Chain</button>
+        </div>
+        <div class="card">
+          <h3>Flowise Bridge</h3>
+          <p>For visual flows built in your Flowise instance.</p>
+          <input class="input" id="wf-id" placeholder="flow id" style="margin-top:10px"/>
+          <textarea class="textarea" id="wf-payload" placeholder='{"question": "..."}' style="margin-top:10px"></textarea>
+          <button class="btn blue" style="margin-top:10px;color:#fff" onclick="runWorkflow()">Run Flowise</button>
+        </div>
       </div>
+      <pre class="console" id="wf-out" style="margin-top:14px;display:none"></pre>
     </section>
 
     <!-- ===== BROWSER ===== -->
@@ -818,10 +829,30 @@ async function authorSkill(){
 
 // --- fine-tune ---
 async function ftOllama(){
-  const o=$("ft-out");o.style.display="block";o.textContent="building…";
+  const o=$("ft-out");o.style.display="block";o.textContent="building Modelfile…";
+  const name=$("ft-name").value.trim()||"yahavi-custom";
+  const base=$("ft-base").value.trim()||"llama3.1:8b";
+  const prompt=$("ft-prompt").value.trim();
+  if(!prompt){toast("Add a system prompt","danger");return;}
+  // clear any previous download button
+  document.querySelectorAll(".ft-download").forEach(el=>el.remove());
   const r=await fetch("/finetune",{method:"POST",headers:{"content-type":"application/json"},
-    body:JSON.stringify({action:"ollama_modelfile",name:$("ft-name").value,base_model:$("ft-base").value,system_prompt:$("ft-prompt").value})});
-  o.textContent=JSON.stringify(await r.json(),null,2);
+    body:JSON.stringify({action:"ollama_modelfile",name,base_model:base,system_prompt:prompt})});
+  const j=await r.json();
+  if(j.modelfile_text){
+    o.textContent=
+      "═══ "+name+".Modelfile ═══\n"+j.modelfile_text+"\n"+
+      "═══ Instructions ═══\n"+(j.instructions||"")+
+      (j.ollama_registered?"\n\n✓ Registered with local Ollama":"");
+    const blob=new Blob([j.modelfile_text],{type:"text/plain"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+    a.download=name+".Modelfile";a.textContent="⬇ Download "+name+".Modelfile";
+    a.className="btn primary ft-download";a.style.marginTop="12px";a.style.display="inline-block";
+    o.after(a);
+    toast("✓ Modelfile generated — download or copy","ok",3500);
+  }else{
+    o.textContent=JSON.stringify(j,null,2);
+  }
 }
 async function ftLora(kind){
   const o=$("ft-out");o.style.display="block";o.textContent="queueing…";
@@ -883,10 +914,26 @@ async function ttsCustom(){
 }
 
 // --- workflows ---
-async function runWorkflow(){
-  const o=$("wf-out");o.style.display="block";
+async function runInlineChain(){
+  const o=$("wf-out");o.style.display="block";o.textContent="running inline chain…";
+  const steps=$("wf-steps").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  if(!steps.length){o.textContent="";toast("Add at least one step","danger");return;}
   const r=await fetch("/workflows/run",{method:"POST",headers:{"content-type":"application/json"},
-    body:JSON.stringify({flow_id:$("wf-id").value,payload:JSON.parse($("wf-payload").value||"{}")})});
+    body:JSON.stringify({inline_steps:steps})});
+  const j=await r.json();
+  if(j.transcript){
+    o.textContent=j.transcript.map(t=>`Step ${t.step}: ${t.prompt}\n  → ${t.output}\n`).join("\n");
+    toast("✓ Chain done — "+j.steps_run+" steps","ok");
+  }else{
+    o.textContent=JSON.stringify(j,null,2);
+  }
+}
+async function runWorkflow(){
+  const o=$("wf-out");o.style.display="block";o.textContent="calling Flowise…";
+  let payload={};
+  try{payload=JSON.parse($("wf-payload").value||"{}");}catch(e){toast("Payload must be valid JSON","danger");return;}
+  const r=await fetch("/workflows/run",{method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({flow_id:$("wf-id").value,payload})});
   o.textContent=JSON.stringify(await r.json(),null,2);
 }
 
@@ -899,9 +946,35 @@ async function brScrape(){
 }
 async function brAgent(){
   const o=$("br-out");o.style.display="block";o.textContent="running…";
+  const instruction=$("br-task").value.trim();
+  if(!instruction){o.textContent="";toast("Type something for the agent","danger");return;}
   const r=await fetch("/browser/run",{method:"POST",headers:{"content-type":"application/json"},
-    body:JSON.stringify({action:"social_post",instruction:$("br-task").value})});
-  o.textContent=JSON.stringify(await r.json(),null,2);
+    body:JSON.stringify({action:"agentic",instruction})});
+  const j=await r.json();
+  o.textContent=JSON.stringify(j,null,2);
+  // execute client-side actions returned by the server
+  if(j.narrate){
+    toast("🤖 "+j.narrate,"info",4500);
+    if("speechSynthesis"in window){
+      try{
+        window.speechSynthesis.cancel();
+        const u=new SpeechSynthesisUtterance(j.narrate);
+        u.lang=/[ऀ-ॿ]/.test(j.narrate)?"hi-IN":"en-IN";u.rate=1.05;u.pitch=0.95;
+        const v=pickVoice(u.lang.startsWith("hi")?"hi":"en","male");if(v)u.voice=v;
+        window.speechSynthesis.speak(u);
+      }catch(e){}
+    }
+  }
+  (j.actions||[]).forEach(a=>{
+    if(a.type==="open_url"&&a.url){
+      const w=window.open(a.url,"_blank","noopener");
+      if(!w){toast("⚠ Browser blocked popup — tap to allow yahavis.hackknow.com","danger",6000);}
+    }else if(a.type==="speak"&&a.text&&"speechSynthesis"in window){
+      const u=new SpeechSynthesisUtterance(a.text);window.speechSynthesis.speak(u);
+    }else if(a.type==="copy"&&a.text&&navigator.clipboard){
+      navigator.clipboard.writeText(a.text).then(()=>toast("📋 Copied","ok"));
+    }
+  });
 }
 
 // --- automations ---

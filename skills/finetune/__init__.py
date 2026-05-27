@@ -40,24 +40,42 @@ JOBS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 async def _ollama_modelfile(name: str, base_model: str, system_prompt: str) -> dict:
-    modelfile = JOBS_DIR / f"{name}.Modelfile"
-    modelfile.write_text(
+    """Generate Modelfile content (always succeeds) + try to register with Ollama if installed."""
+    content = (
         f"FROM {base_model}\n"
         f"SYSTEM \"\"\"{system_prompt}\"\"\"\n"
         f"PARAMETER temperature 0.5\n"
-        f"PARAMETER top_p 0.9\n",
-        encoding="utf-8",
+        f"PARAMETER top_p 0.9\n"
     )
-    proc = await asyncio.create_subprocess_exec(
-        "ollama", "create", name, "-f", str(modelfile),
-        stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
-    )
-    out, err = await proc.communicate()
-    return {
-        "name": name, "exit_code": proc.returncode,
-        "stdout": out.decode()[:2000], "stderr": err.decode()[:2000],
-        "modelfile": str(modelfile),
+    modelfile = JOBS_DIR / f"{name}.Modelfile"
+    modelfile.write_text(content, encoding="utf-8")
+    result = {
+        "name": name,
+        "modelfile_path": str(modelfile),
+        "modelfile_text": content,
+        "instructions": (
+            f"Save this content to a file named '{name}.Modelfile', then run:\n"
+            f"  ollama create {name} -f {name}.Modelfile\n"
+            f"Use it via:  ollama run {name}"
+        ),
     }
+    # try Ollama if installed
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "ollama", "create", name, "-f", str(modelfile),
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+        )
+        out, err = await proc.communicate()
+        result.update({
+            "ollama_registered": proc.returncode == 0,
+            "exit_code": proc.returncode,
+            "stdout": out.decode(errors="replace")[:1500],
+            "stderr": err.decode(errors="replace")[:1500],
+        })
+    except FileNotFoundError:
+        result["ollama_registered"] = False
+        result["note"] = "Ollama not installed on this host — Modelfile generated for you to download/use locally."
+    return result
 
 
 def _write_train_script(job_dir: Path, base_model: str, dataset_path: str,
